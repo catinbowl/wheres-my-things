@@ -1,0 +1,16 @@
+{
+  "name": "wheres-my-things",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "start": "bun --filter wheres-my-things-fe start",
+    "reset-project": "bun --filter wheres-my-things-fe reset-project",
+    "android": "bun --filter wheres-my-things-fe android",
+    "ios": "bun --filter wheres-my-things-fe ios",
+    "web": "bun --filter wheres-my-things-fe web",
+    "lint": "bun --filter wheres-my-things-fe lint"
+  }
+}
