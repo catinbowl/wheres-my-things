@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "wheres-my-things-fe",
-    "slug": "wheres-my-things-fe",
+    "name": "Where's My Things",
+    "slug": "wheresmythings",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "wheresmythingsfe",
+    "scheme": "wheresmythings",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.catinbowl.wheresmythingsfe"
+      "bundleIdentifier": "com.catinbowl.wheresmythings"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.catinbowl.wheresmythingsfe"
+      "package": "com.catinbowl.wheresmythings"
     },
     "web": {
       "output": "static",
