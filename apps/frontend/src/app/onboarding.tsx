@@ -1,4 +1,4 @@
-import { ThemedText as Text } from "@/components/themed-text";
+import { Text as Text } from "@/components/text";
 import Button from "@/components/ui/button";
 import { useAppDispatch } from "@/services/store/hooks";
 import { initialize } from "@/services/store/slices/settings-slices";

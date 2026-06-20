@@ -1,4 +1,4 @@
-import { ThemedText as Text } from "@/components/themed-text";
+import { Text as Text } from "@/components/text";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text-input";
 import { Link, useRouter } from "expo-router";

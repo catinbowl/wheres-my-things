@@ -1,6 +1,7 @@
-import { ThemedText as Text } from "@/components/themed-text";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text-input";
+
+import { Text as Text } from "@/components/text";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";

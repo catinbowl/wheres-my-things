@@ -1,3 +1,4 @@
+import { Radius } from "@/constants/theme";
 import {
   TextInput as RNTextInput,
   StyleSheet,
@@ -19,7 +20,7 @@ const TextInput = ({ ...props }: Props) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "rgba(254, 213, 63, 1)",
-    borderRadius: 20,
+    borderRadius: Radius.lg,
     paddingHorizontal: 16,
     height: 50,
   },

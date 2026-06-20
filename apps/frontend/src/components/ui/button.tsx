@@ -1,5 +1,5 @@
 import { Pressable, PressableProps, StyleSheet } from "react-native";
-import { ThemedText as Text } from "../themed-text";
+import { Text as Text } from "../text";
 
 type Props = PressableProps & {
   title: string;

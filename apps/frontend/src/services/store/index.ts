@@ -1,5 +1,5 @@
-// import authReducer from "@/services/store/slices/auth-slice";
-// import somethingsReducer from "@/services/store/slices/somethings-slices";
+import authReducer from "@/services/store/slices/auth-slice";
+import thingsReducer from "@/services/store/slices/things-slice";
 import settingsReducer from "./slices/settings-slices";
 
 import { configureStore } from "@reduxjs/toolkit";
@@ -7,8 +7,8 @@ import { configureStore } from "@reduxjs/toolkit";
 export const store = configureStore({
   reducer: {
     settings: settingsReducer,
-    // somethings: somethingsReducer,
-    // auth: authReducer,
+    things: thingsReducer,
+    auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -1,0 +1,11 @@
+{
+  "android": {
+    "package": "com.catinbowl.wheresmythings"
+  },
+  "ios": {
+    "bundleIdentifier": "com.catinbowl.wheresmythings"
+  },
+  "plugins": [
+    "expo-sharing"
+  ]
+}
