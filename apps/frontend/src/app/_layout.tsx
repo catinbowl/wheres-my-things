@@ -34,6 +34,7 @@ export default function TabLayout() {
               <Stack.Screen name="signin" />
               <Stack.Screen name="signup" />
               <Stack.Screen name="thing/add/preview" />
+              <Stack.Screen name="thing/[uid]" />
             </Stack>
           </SafeAreaProvider>
         </Provider>

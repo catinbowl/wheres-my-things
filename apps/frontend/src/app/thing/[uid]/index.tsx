@@ -1,19 +1,23 @@
 import * as Share from "expo-sharing";
-import AnimatedRN from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 import MiniMap from "@/components/mini-map";
-import Button from "@/components/ui/button";
+import Header from "@/components/ui/header";
+import IconButton from "@/components/ui/icon-button";
 
 import { ThingsRepo } from "@/services/database/repos/things-repo";
 import { TThing } from "@/services/database/types";
-import { useAppSelector } from "@/services/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/services/store/hooks";
 import { selectAuth } from "@/services/store/slices/auth-slice";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { ArrowLeft, MapPin, Share2, Trash2 } from "lucide-react-native";
+import { MapPin, Share2, Trash2 } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import { Linking, Platform, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { fetchThings } from "@/services/store/slices/things-slice";
+import SlideUpModal from "@/components/slide-up-modal";
+import { Text } from "@/components/text";
+import Button from "@/components/ui/button";
 
 const ThingScreen = () => {
   const router = useRouter();
@@ -22,6 +26,7 @@ const ThingScreen = () => {
   const [showSnackBar, setShowSnackBar] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState("");
   const [isSharing, setIsSharing] = useState(false);
+  const [isConfirmingDeletion, setIsConfirmingDeletion] = useState(false);
   const { uid, uri } = useLocalSearchParams<{
     uid: string | "preview";
     uri: string;
@@ -29,6 +34,7 @@ const ThingScreen = () => {
   const {
     data: { user },
   } = useAppSelector(selectAuth);
+  const dispatch = useAppDispatch();
 
   const fetchThing = async (): Promise<void> => {
     try {
@@ -48,6 +54,7 @@ const ThingScreen = () => {
   const handleDelete = async () => {
     try {
       const result = await ThingsRepo.deleteByUID(db, uid);
+      await dispatch(fetchThings(db)).unwrap();
       if (result) {
         router.back();
       }
@@ -94,17 +101,37 @@ const ThingScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <Stack.Header />
+      <Header
+        title={thing?.name}
+        actionButtons={
+          <>
+            <IconButton onPress={() => setIsConfirmingDeletion(true)}>
+              <Trash2 size={20} />
+            </IconButton>
+            <IconButton onPress={handleShare}>
+              <Share2 size={20} />
+            </IconButton>
+            <IconButton onPress={handleOpenMaps}>
+              <MapPin size={20} />
+            </IconButton>
+          </>
+        }
+      />
 
       <View style={style.splitContainer}>
         <View style={style.splitItem}>
           <Pressable
             onPress={() => {
-              router.push(`/something/${uid}/image` as any);
+              router.navigate({
+                pathname: "/thing/[uid]/image",
+                params: {
+                  uid,
+                },
+              });
             }}
             style={{ flex: 1 }}
           >
-            <AnimatedRN.Image
+            <Animated.Image
               source={{ uri: thing?.imageURI }}
               style={style.image}
             />
@@ -118,6 +145,14 @@ const ThingScreen = () => {
           />
         </View>
       </View>
+
+      <SlideUpModal
+        isOpen={isConfirmingDeletion}
+        title="Are you sure?"
+        onClose={() => setIsConfirmingDeletion(false)}
+      >
+        <Button title="Yes" onPress={handleDelete} />
+      </SlideUpModal>
     </SafeAreaView>
   );
 };

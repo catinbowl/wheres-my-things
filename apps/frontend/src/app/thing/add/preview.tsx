@@ -111,7 +111,7 @@ const PreviewThingScreen = () => {
           <ScrollView
             style={{ flex: 1 }}
             contentContainerStyle={{
-              paddingBottom: 32,
+              marginBottom: 32,
               paddingHorizontal: 16,
               gap: 16,
             }}

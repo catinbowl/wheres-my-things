@@ -1,8 +1,8 @@
-import * as Device from "expo-device";
 import SearchBar from "@/components/ui/search-bar";
 
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -10,12 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from "@/components/text";
 import { View } from "@/components/view";
-import {
-  BottomTabInset,
-  MaxContentWidth,
-  Radius,
-  Spacing,
-} from "@/constants/theme";
+import { Radius, Spacing } from "@/constants/theme";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/services/store/hooks";
 import {
@@ -25,10 +20,12 @@ import {
 } from "@/services/store/slices/things-slice";
 import { useSQLiteContext } from "expo-sqlite";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
-  const dispatch = useAppDispatch();
+  const router = useRouter();
   const db = useSQLiteContext();
+  const dispatch = useAppDispatch();
   const [query, setQuery] = useState("");
   const { data: things, isLoading } = useAppSelector(selectThings);
 
@@ -52,17 +49,25 @@ export default function HomeScreen() {
         <ScrollView style={{ position: "relative" }}>
           <View style={{ gap: Spacing.two }}>
             {things.map(({ uid, name, imageURI }) => (
-              <View
-                type="backgroundElement"
+              <Pressable
                 key={uid}
-                style={styles.thingContainer}
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/thing/[uid]",
+                    params: {
+                      uid,
+                    },
+                  })
+                }
               >
-                <Image
-                  source={{ uri: imageURI }}
-                  style={{ aspectRatio: 4 / 3 }}
-                />
-                <Text style={styles.thingName}>{name}</Text>
-              </View>
+                <View type="backgroundElement" style={styles.thingContainer}>
+                  <Image
+                    source={{ uri: imageURI }}
+                    style={{ aspectRatio: 4 / 3 }}
+                  />
+                  <Text style={styles.thingName}>{name}</Text>
+                </View>
+              </Pressable>
             ))}
           </View>
 
@@ -94,7 +99,7 @@ const styles = StyleSheet.create({
     transform: [{ translateX: "-50%" }],
   },
   thingContainer: {
-    paddingBottom: Spacing.three,
+    paddingBlockEnd: Spacing.three,
     borderRadius: Radius.lg,
     overflow: "hidden",
   },

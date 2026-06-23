@@ -1,5 +1,5 @@
 import { View as RNView, type ViewProps } from "react-native";
-import { Radius, ThemeColor } from "@/constants/theme";
+import { ThemeColor } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
 export type ThemedViewProps = ViewProps & {
