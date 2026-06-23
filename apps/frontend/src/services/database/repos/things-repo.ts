@@ -43,10 +43,7 @@ export const ThingsRepo = {
             data.longitude,
           ]);
         } catch (retryError) {
-          console.error(
-            "things-repo.ts => insert: Retry failed",
-            retryError,
-          );
+          console.error("things-repo.ts => insert: Retry failed", retryError);
         }
       } else {
         console.error("things-repo.ts => insert:", error);
@@ -55,7 +52,7 @@ export const ThingsRepo = {
       return null;
     }
   },
-  selectByUid: async (db: SQLiteDatabase, uid: string) => {
+  selectByUID: async (db: SQLiteDatabase, uid: string) => {
     try {
       const result = await db.getFirstAsync<TThing>(selectByUidSql, [uid]);
 
@@ -126,7 +123,7 @@ export const ThingsRepo = {
       return [];
     }
   },
-  deleteByUid: async (db: SQLiteDatabase, uid: string) => {
+  deleteByUID: async (db: SQLiteDatabase, uid: string) => {
     try {
       const result = await db.runAsync(deleteByUidSql, [uid]);
 

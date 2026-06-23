@@ -1,4 +1,3 @@
-
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { router } from "expo-router";
 import { SQLiteDatabase } from "expo-sqlite";
