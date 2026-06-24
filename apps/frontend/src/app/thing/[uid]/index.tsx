@@ -19,22 +19,28 @@ import SlideUpModal from "@/components/slide-up-modal";
 import { Text } from "@/components/text";
 import Button from "@/components/ui/button";
 
+import { useThingActions } from "@/hooks/use-thing-actions";
+import { Radius } from "@/constants/theme";
+
 const ThingScreen = () => {
   const router = useRouter();
   const db = useSQLiteContext();
   const [thing, setThing] = useState<TThing | null>(null);
-  const [showSnackBar, setShowSnackBar] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState("");
-  const [isSharing, setIsSharing] = useState(false);
   const [isConfirmingDeletion, setIsConfirmingDeletion] = useState(false);
   const { uid, uri } = useLocalSearchParams<{
     uid: string | "preview";
     uri: string;
   }>();
-  const {
-    data: { user },
-  } = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
+
+  const {
+    handleOpenMaps,
+    handleShare,
+    showSnackBar,
+    setShowSnackBar,
+    snackBarMessage,
+    setSnackBarMessage,
+  } = useThingActions();
 
   const fetchThing = async (): Promise<void> => {
     try {
@@ -65,40 +71,6 @@ const ThingScreen = () => {
     }
   };
 
-  const handleOpenMaps = () => {
-    if (!thing) return;
-
-    const { latitude, longitude, name } = thing;
-    const url = Platform.select({
-      ios: `maps:0,0?q=${name}@${latitude},${longitude}`,
-      android: `geo:0,0?q=${latitude},${longitude}(${name})`,
-    });
-
-    if (url) {
-      Linking.openURL(url);
-    }
-  };
-
-  const handleShare = async () => {
-    if (!thing) return;
-
-    if (!user?.isSubscribed) {
-      router.push("/pricing");
-      return;
-    }
-
-    setIsSharing(true);
-
-    try {
-    } catch (error) {
-      console.error("thing/[uid]/index => handleShare:", error);
-      setSnackBarMessage("Something went wrong while sharing this thing!");
-      setShowSnackBar(true);
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <Header
@@ -108,10 +80,10 @@ const ThingScreen = () => {
             <IconButton onPress={() => setIsConfirmingDeletion(true)}>
               <Trash2 size={20} />
             </IconButton>
-            <IconButton onPress={handleShare}>
+            <IconButton onPress={() => handleShare(thing)}>
               <Share2 size={20} />
             </IconButton>
-            <IconButton onPress={handleOpenMaps}>
+            <IconButton onPress={() => handleOpenMaps(thing)}>
               <MapPin size={20} />
             </IconButton>
           </>
@@ -171,7 +143,7 @@ const style = StyleSheet.create({
     flex: 1,
     width: "100%",
     resizeMode: "cover",
-    borderRadius: 16,
+    borderRadius: Radius.lg,
   },
   miniMap: {
     flex: 1,

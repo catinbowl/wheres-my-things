@@ -14,6 +14,7 @@ import { StyleSheet, ViewProps } from "react-native";
 import { useDerivedValue } from "react-native-reanimated";
 import { View } from "./view";
 import { Text } from "./text";
+import { Radius } from "@/constants/theme";
 
 interface Props extends ViewProps {
   latitude: number;
@@ -47,10 +48,9 @@ const Map = ({
   longitude: targetLon,
   ...props
 }: Props) => {
-  const { location, errorMsg } = useCurrentLocation(1000);
-
-  const { heading } = useCompass();
   const [canvasSize, setCanvasSize] = useState(0);
+  const { location, errorMsg } = useCurrentLocation(1000);
+  const { heading } = useCompass();
 
   const stats = useMemo(() => {
     if (!location) return null;
@@ -182,6 +182,10 @@ const styles = StyleSheet.create({
     minHeight: 200,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.3)",
+    borderRadius: Radius.lg,
+    overflow: "hidden",
   },
   infoOverlay: {
     position: "absolute",

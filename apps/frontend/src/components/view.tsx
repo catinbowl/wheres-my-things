@@ -21,7 +21,7 @@ export function View({
     <RNView
       style={[
         {
-          backgroundColor: theme[type ?? "background"],
+          backgroundColor: theme[type ?? "transparent"],
         },
         style,
       ]}

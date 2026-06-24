@@ -21,6 +21,7 @@ import {
 import { useSQLiteContext } from "expo-sqlite";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import ThingListItem from "@/components/thing-list-item";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -48,26 +49,8 @@ export default function HomeScreen() {
 
         <ScrollView style={{ position: "relative" }}>
           <View style={{ gap: Spacing.two }}>
-            {things.map(({ uid, name, imageURI }) => (
-              <Pressable
-                key={uid}
-                onPress={() =>
-                  router.navigate({
-                    pathname: "/thing/[uid]",
-                    params: {
-                      uid,
-                    },
-                  })
-                }
-              >
-                <View type="backgroundElement" style={styles.thingContainer}>
-                  <Image
-                    source={{ uri: imageURI }}
-                    style={{ aspectRatio: 4 / 3 }}
-                  />
-                  <Text style={styles.thingName}>{name}</Text>
-                </View>
-              </Pressable>
+            {things.map((thing) => (
+              <ThingListItem {...thing} key={thing.uid} />
             ))}
           </View>
 
@@ -97,14 +80,5 @@ const styles = StyleSheet.create({
     top: 100,
     left: "50%",
     transform: [{ translateX: "-50%" }],
-  },
-  thingContainer: {
-    paddingBlockEnd: Spacing.three,
-    borderRadius: Radius.lg,
-    overflow: "hidden",
-  },
-  thingName: {
-    marginHorizontal: Spacing.three,
-    marginTop: Spacing.three,
   },
 });
