@@ -11,6 +11,7 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
+      backBehavior="none"
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}
@@ -18,7 +19,26 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/home.png")}
+          sf="homekit"
+          md="home"
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="shared">
+        <NativeTabs.Trigger.Label>Shared</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf="shared.with.you"
+          md="share"
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="settings">
+        <NativeTabs.Trigger.Label>Settings</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf="gear"
+          md="settings"
           renderingMode="template"
         />
       </NativeTabs.Trigger>
@@ -28,7 +48,7 @@ export default function AppTabs() {
         disabled={true}
         listeners={{
           tabPress: () => {
-            router.push("/thing/add");
+            router.navigate("/thing/add");
           },
         }}
       >
@@ -40,14 +60,6 @@ export default function AppTabs() {
               name="plus"
             />
           }
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="shared">
-        <NativeTabs.Trigger.Label>Shared</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/explore.png")}
-          renderingMode="template"
         />
       </NativeTabs.Trigger>
     </NativeTabs>
