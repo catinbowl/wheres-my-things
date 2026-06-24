@@ -1,13 +1,19 @@
+import IconButton from "./ui/icon-button";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
+
 import { Modal, Pressable, StyleSheet } from "react-native";
 import { View } from "./view";
 import { Radius, Spacing } from "@/constants/theme";
 import { Text } from "./text";
-import { ReactNode } from "react";
-import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
-import IconButton from "./ui/icon-button";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react-native";
 import { useTheme } from "@/hooks/use-theme";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = {
   isOpen: boolean;
@@ -23,42 +29,71 @@ export default function SlideUpModal({
   onClose,
 }: Props) {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(1); // 1 = 100%, 0 = 0%
+  const [active, setActive] = useState(isOpen);
+  const hasAnimatedIn = useRef(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      hasAnimatedIn.current = false;
+      opacity.value = 0;
+      translateY.value = 1;
+      setActive(true);
+    } else if (active) {
+      opacity.value = withTiming(0, { duration: 300 });
+      translateY.value = withTiming(1, { duration: 300 }, (finished) => {
+        if (finished) {
+          scheduleOnRN(setActive, false);
+        }
+      });
+    }
+  }, [isOpen]);
+
+  const handleLayout = () => {
+    if (isOpen && !hasAnimatedIn.current) {
+      hasAnimatedIn.current = true;
+      opacity.value = withTiming(1, { duration: 300 });
+      translateY.value = withTiming(0, { duration: 300 });
+    }
+  };
+
+  const animatedBackdropStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
+
+  const animatedInnerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: `${translateY.value * 100}%` as any }],
+    };
+  });
 
   return (
-    <Modal visible={isOpen} transparent animationType="fade">
+    <Modal visible={active} transparent>
       <View style={styles.container}>
-        <Pressable
-          onPress={onClose}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-          }}
-        />
+        <Animated.View style={[StyleSheet.absoluteFill, animatedBackdropStyle]}>
+          <Pressable onPress={onClose} style={styles.backdrop} />
+        </Animated.View>
 
-        {isOpen && (
-          <Animated.View
-            entering={SlideInDown}
-            exiting={SlideOutDown}
-            style={[
-              styles.innerContainer,
-              {
-                backgroundColor: theme.background,
-                paddingBlockEnd: Math.max(insets.bottom, Spacing.three),
-              },
-            ]}
-          >
+        <Animated.View
+          onLayout={handleLayout}
+          style={[
+            styles.innerContainer,
+            {
+              backgroundColor: theme.background,
+            },
+            animatedInnerStyle,
+          ]}
+        >
+          <SafeAreaView edges={["top"]} style={styles.safeArea}>
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                paddingVertical: Spacing.two,
-                marginBottom: Spacing.three,
+                paddingVertical: Spacing.three,
                 backgroundColor: "transparent",
               }}
             >
@@ -70,8 +105,8 @@ export default function SlideUpModal({
             </View>
 
             {children}
-          </Animated.View>
-        )}
+          </SafeAreaView>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -83,9 +118,22 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "transparent",
   },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
   innerContainer: {
-    paddingHorizontal: Spacing.three,
     borderTopStartRadius: Radius.lg,
     borderTopEndRadius: Radius.lg,
+    maxHeight: "90%",
+    paddingBlockEnd: Spacing.three,
+    transform: [{ translateY: "100%" }],
+  },
+  safeArea: {
+    paddingHorizontal: Spacing.three,
   },
 });
