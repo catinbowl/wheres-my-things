@@ -1,6 +1,7 @@
 import { AnimatedSplashOverlay } from "@/components/animated-icon";
 import { initDB } from "@/services/database/schema";
 import { store } from "@/services/store";
+import { useAppSelector } from "@/services/store/hooks";
 import {
   DarkTheme,
   DefaultTheme,
@@ -15,7 +16,6 @@ import { Provider } from "react-redux";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const router = useRouter();
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

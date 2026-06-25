@@ -1,5 +1,12 @@
-import { AppDispatch } from "@/services/store";
-import { useAppSelector } from "@/services/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/services/store/hooks";
+import {
+  fetchAppState,
+  selectAppState,
+} from "@/services/store/slices/app-slice";
+import {
+  selectAuth,
+  validateSession,
+} from "@/services/store/slices/auth-slice";
 import {
   fetchSettings,
   selectSettings,
@@ -7,27 +14,31 @@ import {
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { useDispatch } from "react-redux";
 
 const RootRoute = () => {
   const router = useRouter();
+  const auth = useAppSelector(selectAuth);
+  const appState = useAppSelector(selectAppState);
   const settings = useAppSelector(selectSettings);
-  const dispatch = useDispatch<AppDispatch>();
-
-  console.log(settings);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
+    dispatch(validateSession());
+    dispatch(fetchAppState());
     dispatch(fetchSettings());
-  });
+  }, []);
 
   useEffect(() => {
-    if (settings.isLoading) return;
+    if (appState.isLoading || settings.isLoading || auth.isLoading) return;
 
-    if (!settings.data.isInitialized) {
-      router.replace("/onboarding");
-    } else {
+    if (
+      appState.data.isInitialized &&
+      (settings.data.isOfflineMode || auth.data.token)
+    ) {
       router.replace("/app");
     }
+
+    router.replace("/onboarding");
   }, [settings]);
 
   return (

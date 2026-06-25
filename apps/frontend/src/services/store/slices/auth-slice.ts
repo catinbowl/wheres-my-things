@@ -6,15 +6,15 @@ import { Buffer } from "buffer";
 import { RootState } from "..";
 import { initialize } from "./settings-slices";
 
-interface AuthState {
+type TAuthState = {
   data: {
     user: TUser | null;
     token: string | null;
   };
   isLoading: boolean;
-}
+};
 
-const initialState: AuthState = {
+const initialState: TAuthState = {
   data: {
     user: null,
     token: null,
@@ -53,12 +53,10 @@ export const signin = createAsyncThunk(
 
       const resObj: { user: TUser } = data;
 
-      await dispatch(
-        persistAuth({
-          user: resObj.user,
-          token: "session-cookie",
-        }),
-      );
+      await Storage.multiSet([
+        ["user", JSON.stringify(resObj)],
+        ["token", "session-cookie"],
+      ]);
 
       dispatch(initialize(false));
       return resObj.user;
@@ -74,11 +72,12 @@ export const signin = createAsyncThunk(
 
 export const validateSession = createAsyncThunk(
   "auth/validateSession",
-  async (_, { dispatch }) => {
+  async () => {
     try {
-      const stored = await Storage.multiGet(["user", "token"]);
-      const userStr = stored[0][1];
-      const token = stored[1][1];
+      const [[, userStr], [, token]] = await Storage.multiGet([
+        "user",
+        "token",
+      ]);
 
       if (userStr && token) {
         let isExpired = false;
@@ -97,14 +96,12 @@ export const validateSession = createAsyncThunk(
               }
             }
           }
-        } catch (e) {
-          console.error("Token expiration check failed", e);
+        } catch (error) {
+          console.error("Token expiration check failed", error);
         }
 
         if (!isExpired) {
           const user = JSON.parse(userStr) as TUser;
-          dispatch(setAuth({ user, token }));
-          dispatch(setLoading(false));
 
           return user;
         } else {
@@ -121,30 +118,17 @@ export const validateSession = createAsyncThunk(
         const user = data.user || data.message;
         const newToken = "session-cookie";
 
-        dispatch(persistAuth({ user, token: newToken }));
+        await Storage.multiSet([
+          ["user", JSON.stringify(user)],
+          ["token", newToken],
+        ]);
 
         return user;
+      } else {
+        throw new Error(`${response.status}: ${response.statusText}`);
       }
     } catch (error) {
       console.error("Session validation failed", error);
-    } finally {
-      dispatch(setLoading(false));
-    }
-    return null;
-  },
-);
-
-export const persistAuth = createAsyncThunk(
-  "auth/persistAuth",
-  async (payload: { user: TUser; token: string }, { dispatch }) => {
-    try {
-      await Storage.multiSet([
-        ["user", JSON.stringify(payload.user)],
-        ["token", payload.token],
-      ]);
-      dispatch(setAuth(payload));
-    } catch (error) {
-      console.error("Failed to persist auth data", error);
     }
   },
 );
@@ -182,12 +166,13 @@ export const updateSubscription = createAsyncThunk(
       }
 
       const data = await response.json();
-      const state = getState() as { auth: AuthState };
+      const state = getState() as { auth: TAuthState };
 
       if (state.auth.data.token) {
-        dispatch(
-          persistAuth({ user: data.user, token: state.auth.data.token }),
-        );
+        await Storage.multiSet([
+          ["user", JSON.stringify(data.user)],
+          ["token", state.auth.data.token],
+        ]);
       }
 
       return data.user;
@@ -211,6 +196,19 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(validateSession.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(
+      validateSession.fulfilled,
+      (state, action: PayloadAction<TAuthState["data"]>) => {
+        state.data = action.payload;
+        state.isLoading = false;
+      },
+    );
+    builder.addCase(validateSession.rejected, (state) => {
+      state.isLoading = false;
+    });
     builder.addCase(logoutUser.fulfilled, (state) => {
       state.data.user = null;
       state.data.token = null;

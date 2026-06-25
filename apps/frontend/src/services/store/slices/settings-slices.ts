@@ -7,7 +7,6 @@ interface SettingsState {
   data: {
     theme: "light" | "dark" | "system";
     isOfflineMode: boolean;
-    isInitialized: boolean;
   };
   isLoading: boolean;
 }
@@ -16,7 +15,6 @@ const initialState: SettingsState = {
   data: {
     theme: "system",
     isOfflineMode: false,
-    isInitialized: false,
   },
   isLoading: true,
 };
@@ -24,20 +22,20 @@ const initialState: SettingsState = {
 export const fetchSettings = createAsyncThunk(
   "settings/fetchSettings",
   async () => {
-    const settings = await Storage.multiGet([
-      "theme",
-      "isOfflineMode",
-      "isInitialized",
-    ]);
-    const theme = settings[0][1];
-    const isOfflineMode = settings[1][1] === "true" || false;
-    const isInitialized = settings[2][1] === "true" || false;
+    try {
+      const [theme, isOfflineMode] = await Storage.multiGet([
+        "theme",
+        "isOfflineMode",
+      ]);
 
-    return {
-      theme: theme || "system",
-      isOfflineMode,
-      isInitialized,
-    } as SettingsState["data"];
+      return {
+        theme: theme[1] || "system",
+        isOfflineMode: Boolean(isOfflineMode[1]),
+      } as SettingsState["data"];
+    } catch (error) {
+      console.error("settings-slices.ts", error);
+      return initialState.data;
+    }
   },
 );
 
@@ -46,14 +44,12 @@ export const initialize = createAsyncThunk(
   async (isOfflineMode: boolean) => {
     await Storage.multiSet([
       ["theme", "system"],
-      ["isOfflineMode", isOfflineMode.toString()],
-      ["isInitialized", "true"],
+      ["isOfflineMode", isOfflineMode ? "1" : ""],
     ]);
 
     return {
       theme: "system",
       isOfflineMode,
-      isInitialized: true,
     } as SettingsState["data"];
   },
 );
@@ -76,9 +72,6 @@ const settingsSlice = createSlice({
     builder.addCase(fetchSettings.fulfilled, (state, action) => {
       state.isLoading = false;
       state.data = action.payload;
-    });
-    builder.addCase(fetchSettings.rejected, (state) => {
-      state.isLoading = false;
     });
     builder.addCase(initialize.fulfilled, (state, action) => {
       state.data = action.payload;

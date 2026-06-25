@@ -30,12 +30,6 @@ export default function OnboardingScreen() {
       </Text>
 
       <View style={styles.buttonsContainer}>
-        {/* <Button title="Sign In" onPress={() => console.log("To Sign in")} />
-          <Button title="Sign Up" onPress={() => console.log("To Sign up")} />
-          <Button
-            title="Offline Mode"
-            onPress={() => console.log("To Offline Mode")}
-          /> */}
         <Button title="Sign in" onPress={() => router.navigate("/signin")} />
         <Button title="Sign up" onPress={() => router.navigate("/signup")} />
         <Button
