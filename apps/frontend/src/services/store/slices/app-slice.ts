@@ -17,13 +17,15 @@ const initialState: TInitialState = {
 };
 
 export const fetchAppState = createAsyncThunk("app/fetchState", async () => {
-  const state = await Storage.multiGet(["isInitialized"]);
-
-  return { isInitialized: Boolean(state[0][1]) } as TInitialState["data"];
+  const [[, isInitialized]] = await Storage.multiGet(["isInitialized"]);
+  console.log("fetchAppState: isInitialized = ", isInitialized);
+  return { isInitialized: Boolean(isInitialized) } as TInitialState["data"];
 });
 
-export const initializeApp = createAsyncThunk("app/initialize", async () => {
+export const initApp = createAsyncThunk("app/initialize", async () => {
   await Storage.multiSet([["isInitialized", "1"]]);
+
+  return { isInitialized: true } as TInitialState["data"];
 });
 
 const appSlice = createSlice({
@@ -31,11 +33,11 @@ const appSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(initializeApp.pending, (state) => {
+    builder.addCase(initApp.pending, (state) => {
       state.isLoading = true;
     });
-    builder.addCase(initializeApp.fulfilled, (state) => {
-      state.data.isInitialized = true;
+    builder.addCase(initApp.fulfilled, (state, action) => {
+      state.data = action.payload;
       state.isLoading = false;
     });
     builder.addCase(fetchAppState.pending, (state) => {

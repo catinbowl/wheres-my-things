@@ -39,7 +39,7 @@ export const fetchSettings = createAsyncThunk(
   },
 );
 
-export const initialize = createAsyncThunk(
+export const initSettings = createAsyncThunk(
   "settings/initialize",
   async (isOfflineMode: boolean) => {
     await Storage.multiSet([
@@ -73,7 +73,7 @@ const settingsSlice = createSlice({
       state.isLoading = false;
       state.data = action.payload;
     });
-    builder.addCase(initialize.fulfilled, (state, action) => {
+    builder.addCase(initSettings.fulfilled, (state, action) => {
       state.data = action.payload;
     });
   },

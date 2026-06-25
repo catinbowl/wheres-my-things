@@ -4,7 +4,7 @@ import { TUser } from "@/services/database/types";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Buffer } from "buffer";
 import { RootState } from "..";
-import { initialize } from "./settings-slices";
+import { initSettings } from "./settings-slices";
 
 type TAuthState = {
   data: {
@@ -19,7 +19,7 @@ const initialState: TAuthState = {
     user: null,
     token: null,
   },
-  isLoading: true,
+  isLoading: false,
 };
 
 export const signin = createAsyncThunk(
@@ -58,7 +58,7 @@ export const signin = createAsyncThunk(
         ["token", "session-cookie"],
       ]);
 
-      dispatch(initialize(false));
+      dispatch(initSettings(false));
       return resObj.user;
     } catch (error: any) {
       console.error("Sign in failed", error);

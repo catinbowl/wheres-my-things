@@ -1,7 +1,9 @@
-import { Text as Text } from "@/components/text";
 import Button from "@/components/ui/button";
+
+import { Text as Text } from "@/components/text";
 import { useAppDispatch } from "@/services/store/hooks";
-import { initialize } from "@/services/store/slices/settings-slices";
+import { initApp } from "@/services/store/slices/app-slice";
+import { initSettings } from "@/services/store/slices/settings-slices";
 import { useRouter } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -10,8 +12,11 @@ export default function OnboardingScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const handleFinishOnboarding = (isOfflineMode: boolean) => {
-    dispatch(initialize(isOfflineMode));
+  const handleFinishOnboarding = async (isOfflineMode: boolean) => {
+    await dispatch(initApp()).unwrap();
+    await dispatch(initSettings(isOfflineMode)).unwrap();
+
+    router.replace("/");
   };
 
   return (
@@ -34,7 +39,7 @@ export default function OnboardingScreen() {
         <Button title="Sign up" onPress={() => router.navigate("/signup")} />
         <Button
           title="Offline Mode"
-          onPress={() => handleFinishOnboarding(false)}
+          onPress={() => handleFinishOnboarding(true)}
         />
       </View>
     </SafeAreaView>

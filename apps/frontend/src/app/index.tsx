@@ -22,24 +22,33 @@ const RootRoute = () => {
   const settings = useAppSelector(selectSettings);
   const dispatch = useAppDispatch();
 
+  console.log("auth state", auth);
+  console.log("app state", appState);
+  console.log("settings state", settings);
+
   useEffect(() => {
-    dispatch(validateSession());
     dispatch(fetchAppState());
     dispatch(fetchSettings());
   }, []);
 
   useEffect(() => {
-    if (appState.isLoading || settings.isLoading || auth.isLoading) return;
+    if (appState.isLoading) return;
 
-    if (
-      appState.data.isInitialized &&
-      (settings.data.isOfflineMode || auth.data.token)
-    ) {
-      router.replace("/app");
+    if (!appState.data.isInitialized) return router.replace("/onboarding");
+
+    if (settings.isLoading) return;
+
+    if (settings.data.isOfflineMode) return router.replace("/app");
+
+    if (!auth.isLoading) {
+      dispatch(validateSession());
+      return;
     }
 
-    router.replace("/onboarding");
-  }, [settings]);
+    if (auth.isLoading) return;
+
+    if (auth.data.token) router.replace("/app");
+  }, [auth, settings, appState]);
 
   return (
     <View style={styles.container}>
