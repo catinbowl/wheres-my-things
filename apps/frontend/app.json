@@ -89,27 +89,13 @@
         }
       ],
       [
-        "expo-sharing",
-        {
-          "ios": {
-            "enabled": true,
-            "activationRule": {
-              "supportsImageWithMaxCount": 5
-            }
-          },
-          "android": {
-            "enabled": true,
-            "singleShareMimeTypes": ["image/*"],
-            "multipleShareMimeTypes": ["image/*"]
-          }
-        }
-      ],
-      [
         "expo-sensors",
         {
           "motionPermission": "Allow $(PRODUCT_NAME) to access your device motion"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

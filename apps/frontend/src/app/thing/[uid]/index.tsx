@@ -1,8 +1,9 @@
-import * as Share from "expo-sharing";
 import Animated from "react-native-reanimated";
 import MiniMap from "@/components/mini-map";
 import Header from "@/components/ui/header";
 import IconButton from "@/components/ui/icon-button";
+import SlideUpModal from "@/components/slide-up-modal";
+import Button from "@/components/ui/button";
 
 import { ThingsRepo } from "@/services/database/repos/things-repo";
 import { TThing } from "@/services/database/types";
@@ -15,10 +16,7 @@ import { useEffect, useState } from "react";
 import { Linking, Platform, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchThings } from "@/services/store/slices/things-slice";
-import SlideUpModal from "@/components/slide-up-modal";
 import { Text } from "@/components/text";
-import Button from "@/components/ui/button";
-
 import { useThingActions } from "@/hooks/use-thing-actions";
 import { Radius } from "@/constants/theme";
 
