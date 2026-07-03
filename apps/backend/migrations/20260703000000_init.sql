@@ -1,0 +1,29 @@
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    uid UUID PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    "isSubscribed" BOOLEAN NOT NULL DEFAULT FALSE,
+    "subscriptionEnds" VARCHAR(255) NOT NULL DEFAULT '',
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create things table
+CREATE TABLE IF NOT EXISTS things (
+    id SERIAL PRIMARY KEY,
+    "userID" UUID REFERENCES users(uid) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL,
+    latitude NUMERIC NOT NULL,
+    longitude NUMERIC NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create sessions table
+CREATE TABLE IF NOT EXISTS sessions (
+    token VARCHAR(255) PRIMARY KEY,
+    "userID" UUID NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+    "expiresAt" TIMESTAMP NOT NULL
+);

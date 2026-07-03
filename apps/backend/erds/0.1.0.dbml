@@ -1,0 +1,22 @@
+Table users [headercolor: #175e7a] {
+	uid uuid [ pk, not null ]
+	username varchar(255) [ not null, unique ]
+	email varchar(255) [ not null ]
+	password varchar(255) [ not null ]
+	createdAt timestamp
+	updatedAt timestamp
+}
+
+Table things [headercolor: #175e7a] {
+	id integer [ pk, increment, not null ]
+	userID uuid
+	name varchar(255) [ not null ]
+	latitude numeric [ not null ]
+	longitude numeric [ not null ]
+	createdAt timestamp
+	updatedAt timestamp
+}
+
+Ref fk_things_userID_users {
+	things.userID > users.uid [ delete: no action, update: no action ]
+}
