@@ -1,13 +1,14 @@
 import { Text as Text } from "@/components/text";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text-input";
-import { Link, useRouter } from "expo-router";
+import { Link, useRouter, useNavigation } from "expo-router";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   // const dispatch = useDispatch<AppDispatch>();
 
   const [email, setEmail] = useState("");
@@ -55,7 +56,19 @@ export default function SignUpScreen() {
 
         <Text style={styles.footerText}>
           Already have account?{" "}
-          <Link href="/signin" asChild>
+          <Link
+            href="/signin"
+            asChild
+            onPress={(e) => {
+              const state = navigation.getState();
+              const routes = state?.routes || [];
+              const previousRoute = routes[routes.length - 2];
+              if (previousRoute && previousRoute.name === "signin") {
+                e.preventDefault();
+                router.back();
+              }
+            }}
+          >
             <Text type="linkPrimary">Sign In</Text>
           </Link>
         </Text>
