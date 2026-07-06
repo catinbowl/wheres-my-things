@@ -1,0 +1,3 @@
+[submodule "apps/database"]
+	path = apps/database
+	url = https://codeberg.org/catinbowl/catinbowl-databases.git
