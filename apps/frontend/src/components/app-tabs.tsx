@@ -11,7 +11,7 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
-      backBehavior="none"
+      backBehavior="initialRoute"
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}

@@ -31,7 +31,7 @@ export const signin = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/signin`,
+        `${process.env.API_HOST_URL}/signin`,
         {
           method: "POST",
           headers: {
@@ -110,7 +110,7 @@ export const validateSession = createAsyncThunk(
       }
 
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/validate`,
+        `${process.env.API_HOST_URL}/validate`,
       );
 
       if (response.ok) {
@@ -138,7 +138,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       await Storage.multiRemove(["user", "token"]);
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL}/logout`);
+      await fetch(`${process.env.API_HOST_URL}/logout`);
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -150,7 +150,7 @@ export const updateSubscription = createAsyncThunk(
   async (planId: string, { getState, dispatch }) => {
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/users/subscribe`,
+        `${process.env.API_HOST_URL}/users/subscribe`,
         {
           method: "POST",
           headers: {

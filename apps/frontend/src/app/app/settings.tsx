@@ -30,10 +30,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      <Text type="h1" style={styles.title}>
-        Settings
-      </Text>
-
       <View style={styles.content}>
         {isOfflineMode ? (
           <View style={styles.section}>
@@ -43,7 +39,6 @@ export default function SettingsScreen() {
             <Button
               title="Sign In"
               onPress={handleSignIn}
-              style={styles.button}
             />
           </View>
         ) : (
@@ -56,7 +51,6 @@ export default function SettingsScreen() {
             <Button
               title="Sign Out"
               onPress={handleSignOut}
-              style={styles.button}
             />
           </View>
         )}
@@ -81,7 +75,6 @@ const styles = StyleSheet.create({
   section: {
     width: "100%",
     gap: Spacing.three,
-    alignItems: "center",
   },
   message: {
     fontSize: 16,
@@ -91,9 +84,5 @@ const styles = StyleSheet.create({
   username: {
     textAlign: "center",
     marginBottom: Spacing.two,
-  },
-  button: {
-    width: "80%",
-    maxWidth: 300,
   },
 });
