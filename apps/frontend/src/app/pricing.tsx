@@ -1,4 +1,7 @@
+import React, { useState } from "react";
 import { Text } from "@/components/text";
+import Button from "@/components/ui/button";
+import Header from "@/components/ui/header";
 import { AppDispatch } from "@/services/store";
 import {
   selectAuth,
@@ -6,9 +9,12 @@ import {
 } from "@/services/store/slices/auth-slice";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
+import { CheckCircle2, Sparkles } from "lucide-react-native";
+import { Radius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 const PricingScreen = () => {
   const {
@@ -16,6 +22,7 @@ const PricingScreen = () => {
   } = useSelector(selectAuth);
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
+  const theme = useTheme();
 
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null);
 
@@ -51,211 +58,214 @@ const PricingScreen = () => {
   const plans = [
     {
       id: "free",
-      name: "Free",
+      name: "Free Plan",
       price: "$0",
+      period: "forever",
       features: ["Up to 5 items", "Standard sharing", "Basic search"],
-      color: ["#4c669f", "#3b5998", "#192f6a"],
+      colors: [theme.cardBackground, theme.backgroundElement] as const,
     },
     {
       id: "pro",
-      name: "Pro",
-      price: "$4.99/mo",
+      name: "Pro Plan",
+      price: "$4.99",
+      period: "/month",
       features: [
         "Unlimited items",
         "Priority sharing",
         "Advanced AI search",
         "Cloud backup",
       ],
-      color: ["#8e2de2", "#4a00e0"],
+      colors: ["#FED43F", "#F59E0B"] as const,
       popular: true,
     },
     {
       id: "premium",
-      name: "Premium",
-      price: "$49.99/yr",
+      name: "Premium Annual",
+      price: "$49.99",
+      period: "/year",
       features: [
         "All Pro features",
         "Family sharing",
         "Offline mode",
-        "24/7 Support",
+        "24/7 Priority Support",
       ],
-      color: ["#f12711", "#f5af19"],
+      colors: ["#2BB8B3", "#0D9488"] as const,
     },
   ];
 
   const isSubscribed = user?.isSubscribed;
 
   return (
-    <ScrollView style={[styles.container]}>
-      <LinearGradient colors={["#FED43F", "#2BB8B3"]} style={styles.header}>
-        {/* <IconButton
-          icon="close"
-          size={24}
-          onPress={() => router.back()}
-          style={styles.closeButton}
-        /> */}
-        <Text type="title">Choose Your Plan</Text>
-        <Text style={{ textAlign: "center" }}>
-          Unlock all features and find your things faster.
-        </Text>
-      </LinearGradient>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <Header title="Choose Your Plan" />
 
-      {/* <View style={styles.plansContainer}>
-        {plans.map((plan) => {
-          const isCurrentPlan =
-            (plan.id === "free" && !isSubscribed) ||
-            (isSubscribed &&
-              plan.id === "pro" &&
-              !user?.subscriptionEnds.includes("yr")) ||
-            (isSubscribed && plan.id === "premium");
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.heroSection}>
+          <Text type="h2" style={styles.heroTitle}>
+            Unlock Full Access
+          </Text>
+          <Text style={[styles.heroSubtitle, { color: theme.textSecondary }]}>
+            Find your things faster with AI search and unlimited cloud backup.
+          </Text>
+        </View>
 
-          return (
-            <Card key={plan.id} style={styles.planCard}>
-              <LinearGradient
-                colors={plan.color as [string, string, string]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.planGradient}
+        <View style={styles.plansContainer}>
+          {plans.map((plan) => {
+            const isCurrentPlan =
+              (plan.id === "free" && !isSubscribed) ||
+              (isSubscribed &&
+                plan.id === "pro" &&
+                !user?.subscriptionEnds?.includes("yr")) ||
+              (isSubscribed && plan.id === "premium");
+
+            const isProGradient = plan.popular;
+
+            return (
+              <View
+                key={plan.id}
+                style={[
+                  styles.planCard,
+                  {
+                    backgroundColor: theme.cardBackground,
+                    borderColor: plan.popular ? theme.primary : theme.borderColor,
+                    borderWidth: plan.popular ? 2 : 1,
+                  },
+                ]}
               >
-                <View style={styles.planHeader}>
-                  <View>
-                    <Host>
-                      <Text
-                        style={{ typography: "titleLarge", fontWeight: "bold" }}
-                      >
-                        {plan.name}
-                      </Text>
-                    </Host>
-                    {plan.popular && (
-                      <Surface style={styles.popularBadge} elevation={1}>
-                        <Host>
-                          <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                            POPULAR
-                          </Text>
-                        </Host>
-                      </Surface>
-                    )}
+                {plan.popular && (
+                  <View style={styles.popularBadge}>
+                    <Sparkles size={12} color="#1A1A1A" />
+                    <Text style={styles.popularBadgeText}>MOST POPULAR</Text>
                   </View>
-                  <Host>
-                    <Text
-                      style={{
-                        typography: "headlineSmall",
-                        fontWeight: "bold",
-                      }}
-                    >
+                )}
+
+                <View style={styles.planHeader}>
+                  <Text type="h4" style={styles.planName}>
+                    {plan.name}
+                  </Text>
+                  <View style={styles.priceRow}>
+                    <Text type="h2" style={styles.planPrice}>
                       {plan.price}
                     </Text>
-                  </Host>
-                </View>
-              </LinearGradient>
-              <Card.Content style={styles.planContent}>
-                {plan.features.map((feature, index) => (
-                  <View key={index} style={styles.featureRow}>
-                    <IconButton
-                      icon="check-circle"
-                      iconColor={theme.colors.primary}
-                      size={18}
-                    />
-                    <Host>
-                      <Text style={{ typography: "bodyMedium" }}>
-                        {feature}
-                      </Text>
-                    </Host>
+                    <Text style={[styles.planPeriod, { color: theme.textSecondary }]}>
+                      {plan.period}
+                    </Text>
                   </View>
-                ))}
-                <Divider style={styles.divider} />
+                </View>
+
+                <View style={styles.featureList}>
+                  {plan.features.map((feature, index) => (
+                    <View key={index} style={styles.featureRow}>
+                      <CheckCircle2
+                        size={18}
+                        color={plan.popular ? theme.primary : theme.secondary}
+                      />
+                      <Text style={styles.featureText}>{feature}</Text>
+                    </View>
+                  ))}
+                </View>
+
                 <Button
-                  mode={plan.popular ? "contained" : "outlined"}
-                  onPress={() => handleSubscribe(plan.id)}
+                  title={isCurrentPlan ? "Current Plan" : "Select Plan"}
+                  variant={plan.popular ? "primary" : isCurrentPlan ? "outline" : "secondary"}
+                  size="md"
                   loading={subscribingPlan === plan.id}
                   disabled={subscribingPlan !== null || isCurrentPlan}
-                  style={styles.subscribeButton}
-                >
-                  {isCurrentPlan ? "Current Plan" : "Select Plan"}
-                </Button>
-              </Card.Content>
-            </Card>
-          );
-        })}
-      </View> */}
-    </ScrollView>
+                  onPress={() => handleSubscribe(plan.id)}
+                  style={styles.subscribeBtn}
+                />
+              </View>
+            );
+          })}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
   },
-  header: {
-    padding: 24,
-    paddingTop: 60,
+  scrollContent: {
+    paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.six,
+  },
+  heroSection: {
     alignItems: "center",
+    marginVertical: Spacing.three,
   },
-  closeButton: {
-    position: "absolute",
-    top: 40,
-    left: 10,
-  },
-  title: {
-    fontWeight: "bold",
+  heroTitle: {
     textAlign: "center",
-    marginBottom: 8,
+    fontWeight: "700",
   },
-  subtitle: {
+  heroSubtitle: {
     textAlign: "center",
-    opacity: 0.7,
-    marginBottom: 16,
+    marginTop: Spacing.one,
+    fontSize: 15,
+    maxWidth: 300,
   },
   plansContainer: {
-    padding: 16,
-    paddingBottom: 40,
+    gap: Spacing.four,
+    marginTop: Spacing.two,
   },
   planCard: {
-    marginBottom: 24,
-    overflow: "hidden",
-    borderRadius: 16,
+    borderRadius: Radius.xl,
+    padding: Spacing.four,
+    position: "relative",
   },
-  planGradient: {
-    padding: 20,
+  popularBadge: {
+    position: "absolute",
+    top: -12,
+    right: Spacing.four,
+    backgroundColor: "#FED43F",
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 4,
+    borderRadius: Radius.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  popularBadgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#1A1A1A",
   },
   planHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    marginBottom: Spacing.three,
   },
   planName: {
-    color: "white",
-    fontWeight: "bold",
+    fontWeight: "700",
+    marginBottom: Spacing.one,
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
   },
   planPrice: {
-    color: "white",
-    fontWeight: "bold",
+    fontWeight: "800",
   },
-  planContent: {
-    paddingTop: 16,
+  planPeriod: {
+    fontSize: 14,
+  },
+  featureList: {
+    gap: Spacing.two,
+    marginBottom: Spacing.four,
   },
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    gap: Spacing.two,
   },
-  divider: {
-    marginVertical: 16,
+  featureText: {
+    fontSize: 15,
   },
-  subscribeButton: {
-    borderRadius: 8,
-  },
-  popularBadge: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    marginTop: 4,
-  },
-  popularText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
+  subscribeBtn: {
+    marginTop: Spacing.one,
   },
 });
 

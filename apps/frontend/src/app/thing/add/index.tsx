@@ -1,21 +1,26 @@
+import React, { useCallback, useRef, useState } from "react";
 import Button from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
+import Header from "@/components/ui/header";
 
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { ImageManipulator } from "expo-image-manipulator";
 import { useFocusEffect, useRouter } from "expo-router";
 import { View } from "@/components/view";
 import { Text } from "@/components/text";
-import { useCallback, useRef, useState } from "react";
-import { StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Repeat as RepeatIcon,
+  RefreshCw,
   Camera as CameraIcon,
+  CameraOff,
 } from "lucide-react-native";
-import { Spacing } from "@/constants/theme";
+import { Radius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 const AddThingScreen = () => {
   const router = useRouter();
+  const theme = useTheme();
   const cameraRef = useRef<CameraView>(null);
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
@@ -28,25 +33,45 @@ const AddThingScreen = () => {
   );
 
   if (!permission) {
-    return <View>{/* <ActivityIndicator animating size="large" /> */}</View>;
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
   }
 
   if (!permission.granted) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          paddingHorizontal: Spacing.three,
-        }}
-      >
-        <Text style={{ textAlign: "center" }}>Need to access camera</Text>
-        <Button
-          style={{ marginTop: Spacing.four }}
-          title="Grant Permission"
-          onPress={requestPermission}
-        />
-      </View>
+      <SafeAreaView style={[styles.permissionSafeArea, { backgroundColor: theme.background }]}>
+        <Header title="Add New Belonging" />
+
+        <View style={styles.permissionContent}>
+          <View
+            style={[
+              styles.permissionIconCircle,
+              { backgroundColor: theme.backgroundElement },
+            ]}
+          >
+            <CameraOff size={44} color={theme.textSecondary} />
+          </View>
+
+          <Text type="h3" style={styles.permissionTitle}>
+            Camera Permission Needed
+          </Text>
+
+          <Text style={[styles.permissionSubtitle, { color: theme.textSecondary }]}>
+            We need camera access so you can take a photo of your item and save it.
+          </Text>
+
+          <Button
+            title="Grant Camera Access"
+            variant="primary"
+            size="lg"
+            onPress={requestPermission}
+            style={styles.grantBtn}
+          />
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -60,6 +85,7 @@ const AddThingScreen = () => {
 
       try {
         const photo = await cameraRef.current.takePictureAsync();
+        if (!photo) return;
         const imageCtx = ImageManipulator.manipulate(photo.uri);
         const result = await (
           await imageCtx.resize({ width: 1080 }).renderAsync()
@@ -76,48 +102,153 @@ const AddThingScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.fullScreen}>
       <CameraView
         style={styles.camera}
         facing={facing}
         ref={cameraRef}
-        ratio="4:3"
       />
 
-      <View style={styles.buttonContainer}>
-        <IconButton onPress={handleSwitchCamera} style={styles.actionButton}>
-          <RepeatIcon size={24} color="white" />
-        </IconButton>
+      <SafeAreaView style={styles.overlaySafeArea} pointerEvents="box-none">
+        <View style={styles.topBar}>
+          <IconButton
+            variant="filled"
+            onPress={() => router.back()}
+            style={styles.glassButton}
+          >
+            <Header showBack={true} />
+          </IconButton>
+        </View>
 
-        <IconButton onPress={handleTakePicture} style={styles.actionButton}>
-          <CameraIcon size={24} color="white" />
-        </IconButton>
-      </View>
+        <View style={styles.bottomControls}>
+          <IconButton
+            variant="filled"
+            onPress={handleSwitchCamera}
+            style={styles.controlCircle}
+          >
+            <RefreshCw size={24} color="#FFFFFF" />
+          </IconButton>
+
+          <Pressable
+            disabled={isCapturing}
+            onPress={handleTakePicture}
+            style={({ pressed }) => [
+              styles.shutterOuterRing,
+              pressed && styles.shutterPressed,
+            ]}
+          >
+            <View style={styles.shutterInnerCircle}>
+              {isCapturing ? (
+                <ActivityIndicator size="small" color="#1A1A1A" />
+              ) : (
+                <CameraIcon size={28} color="#1A1A1A" />
+              )}
+            </View>
+          </Pressable>
+
+          <View style={styles.placeholderCircle} />
+        </View>
+      </SafeAreaView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  fullScreen: {
+    flex: 1,
+    backgroundColor: "#000000",
+  },
   camera: {
     flex: 1,
   },
-  buttonContainer: {
-    position: "absolute",
-    bottom: 64,
-    flexDirection: "row",
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  permissionSafeArea: {
+    flex: 1,
+  },
+  permissionContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: Spacing.four,
+  },
+  permissionIconCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: Spacing.four,
+  },
+  permissionTitle: {
+    textAlign: "center",
+    fontWeight: "700",
+    marginBottom: Spacing.two,
+  },
+  permissionSubtitle: {
+    textAlign: "center",
+    fontSize: 15,
+    maxWidth: 280,
+    marginBottom: Spacing.five,
+  },
+  grantBtn: {
     width: "100%",
-    paddingHorizontal: 64,
-    justifyContent: "space-evenly",
+  },
+  overlaySafeArea: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: "space-between",
+  },
+  topBar: {
+    paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.two,
+  },
+  glassButton: {
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: Radius.lg,
+  },
+  bottomControls: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingBottom: Spacing.six,
+    paddingHorizontal: Spacing.four,
+  },
+  controlCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderCircle: {
+    width: 52,
+    height: 52,
+  },
+  shutterOuterRing: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    borderWidth: 4,
+    borderColor: "#FED43F",
+    padding: 3,
+    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "transparent",
   },
-  actionButton: {
-    padding: Spacing.three,
+  shutterPressed: {
+    transform: [{ scale: 0.94 }],
   },
-  text: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+  shutterInnerCircle: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 34,
+    backgroundColor: "#FED43F",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

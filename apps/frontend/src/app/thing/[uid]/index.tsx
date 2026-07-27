@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import Animated from "react-native-reanimated";
 import MiniMap from "@/components/mini-map";
 import Header from "@/components/ui/header";
@@ -7,43 +8,38 @@ import Button from "@/components/ui/button";
 
 import { ThingsRepo } from "@/services/database/repos/things-repo";
 import { TThing } from "@/services/database/types";
-import { useAppDispatch, useAppSelector } from "@/services/store/hooks";
-import { selectAuth } from "@/services/store/slices/auth-slice";
+import { useAppDispatch } from "@/services/store/hooks";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { MapPin, Share2, Trash2 } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { Linking, Platform, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchThings } from "@/services/store/slices/things-slice";
 import { Text } from "@/components/text";
 import { useThingActions } from "@/hooks/use-thing-actions";
-import { Radius } from "@/constants/theme";
+import { Radius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 const ThingScreen = () => {
   const router = useRouter();
   const db = useSQLiteContext();
+  const theme = useTheme();
   const [thing, setThing] = useState<TThing | null>(null);
   const [isConfirmingDeletion, setIsConfirmingDeletion] = useState(false);
-  const { uid, uri } = useLocalSearchParams<{
-    uid: string | "preview";
-    uri: string;
-  }>();
+  const { uid } = useLocalSearchParams<{ uid: string }>();
   const dispatch = useAppDispatch();
 
   const {
     handleOpenMaps,
     handleShare,
-    showSnackBar,
-    setShowSnackBar,
-    snackBarMessage,
     setSnackBarMessage,
+    setShowSnackBar,
   } = useThingActions();
 
   const fetchThing = async (): Promise<void> => {
     try {
-      const thing = await ThingsRepo.selectByUID(db, uid);
-      setThing(thing);
+      const result = await ThingsRepo.selectByUID(db, uid);
+      setThing(result);
     } catch (error) {
       console.error("thing/[uid]/index => fetchThing:", error);
       setSnackBarMessage("Something went wrong while fetching this thing!");
@@ -70,33 +66,36 @@ const ThingScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView style={[style.safeArea, { backgroundColor: theme.background }]}>
       <Header
-        title={thing?.name}
+        title={thing?.name || "Belonging Detail"}
         actionButtons={
           <>
             <IconButton onPress={() => setIsConfirmingDeletion(true)}>
-              <Trash2 size={20} />
+              <Trash2 size={20} color={theme.danger} />
             </IconButton>
             <IconButton onPress={() => handleShare(thing)}>
-              <Share2 size={20} />
+              <Share2 size={20} color={theme.text} />
             </IconButton>
             <IconButton onPress={() => handleOpenMaps(thing)}>
-              <MapPin size={20} />
+              <MapPin size={20} color={theme.text} />
             </IconButton>
           </>
         }
       />
 
       <View style={style.splitContainer}>
-        <View style={style.splitItem}>
+        <View
+          style={[
+            style.cardWrapper,
+            { backgroundColor: theme.cardBackground, borderColor: theme.borderColor },
+          ]}
+        >
           <Pressable
             onPress={() => {
               router.navigate({
                 pathname: "/thing/[uid]/image",
-                params: {
-                  uid,
-                },
+                params: { uid },
               });
             }}
             style={{ flex: 1 }}
@@ -107,7 +106,13 @@ const ThingScreen = () => {
             />
           </Pressable>
         </View>
-        <View style={style.splitItem}>
+
+        <View
+          style={[
+            style.cardWrapper,
+            { backgroundColor: theme.cardBackground, borderColor: theme.borderColor },
+          ]}
+        >
           <MiniMap
             latitude={thing?.latitude || 0}
             longitude={thing?.longitude || 0}
@@ -118,33 +123,69 @@ const ThingScreen = () => {
 
       <SlideUpModal
         isOpen={isConfirmingDeletion}
-        title="Are you sure?"
+        title="Delete Belonging"
         onClose={() => setIsConfirmingDeletion(false)}
       >
-        <Button title="Yes" onPress={handleDelete} />
+        <View style={style.modalContent}>
+          <Text style={[style.modalText, { color: theme.textSecondary }]}>
+            Are you sure you want to delete "{thing?.name}"? This action cannot be undone.
+          </Text>
+          <View style={style.modalActions}>
+            <Button
+              title="Cancel"
+              variant="outline"
+              size="md"
+              onPress={() => setIsConfirmingDeletion(false)}
+              style={{ flex: 1 }}
+            />
+            <Button
+              title="Delete"
+              variant="danger"
+              size="md"
+              onPress={handleDelete}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </View>
       </SlideUpModal>
     </SafeAreaView>
   );
 };
 
 const style = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   splitContainer: {
     flex: 1,
-    padding: 16,
-    gap: 16,
+    padding: Spacing.three,
+    gap: Spacing.three,
   },
-  splitItem: {
+  cardWrapper: {
     flex: 1,
-    height: "50%",
+    borderRadius: Radius.xl,
+    overflow: "hidden",
+    borderWidth: 1,
   },
   image: {
     flex: 1,
     width: "100%",
     resizeMode: "cover",
-    borderRadius: Radius.lg,
   },
   miniMap: {
     flex: 1,
+  },
+  modalContent: {
+    gap: Spacing.four,
+    paddingVertical: Spacing.two,
+  },
+  modalText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: Spacing.two,
   },
 });
 

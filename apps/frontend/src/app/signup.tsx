@@ -1,77 +1,113 @@
-import { Text as Text } from "@/components/text";
+import React, { useState } from "react";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text-input";
+import Header from "@/components/ui/header";
+import { Text } from "@/components/text";
 import { Link, useRouter, useNavigation } from "expo-router";
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Mail, Lock, User } from "lucide-react-native";
+import { Spacing, Radius } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function SignUpScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  // const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
 
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // const handleSignIn = async () => {
-  //   if (!email || !password) return;
-
-  //   setLoading(true);
-
-  //   try {
-  //     const resultAction = await dispatch(signin({ email, password }));
-  //     if (signin.rejected.match(resultAction)) {
-  //       throw new Error((resultAction.payload as string) || "Sign in failed");
-  //     }
-  //   } catch (error: any) {
-  //     alert(error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
-    <SafeAreaView edges={["top"]} style={[styles.safeArea]}>
-      {/* <LinearGradient
-        colors={["#2BB8B3", "#FED43F"]}
-        style={styles.background}
-      /> */}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+      <Header title="" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <Text type="subtitle" style={styles.title}>
-          Create Account
-        </Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.headerSection}>
+            <Text type="h2" style={styles.title}>
+              Create Account
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+              Join and keep track of all your things effortlessly
+            </Text>
+          </View>
 
-        <View style={styles.formContainer}>
-          <TextInput placeholder="Username" />
-          <TextInput placeholder="Email" />
-          <TextInput placeholder="Password" />
-          <Button title="Sign up" />
-        </View>
-
-        <Text style={styles.footerText}>
-          Already have account?{" "}
-          <Link
-            href="/signin"
-            asChild
-            onPress={(e) => {
-              const state = navigation.getState();
-              const routes = state?.routes || [];
-              const previousRoute = routes[routes.length - 2];
-              if (previousRoute && previousRoute.name === "signin") {
-                e.preventDefault();
-                router.back();
-              }
-            }}
+          <View
+            style={[
+              styles.cardContainer,
+              {
+                backgroundColor: theme.cardBackground,
+                borderColor: theme.borderColor,
+              },
+            ]}
           >
-            <Text type="linkPrimary">Sign In</Text>
-          </Link>
-        </Text>
+            <TextInput
+              placeholder="Username"
+              value={username}
+              onChangeText={setUsername}
+              leftIcon={<User size={20} color={theme.textSecondary} />}
+            />
+
+            <TextInput
+              placeholder="Email address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+              leftIcon={<Mail size={20} color={theme.textSecondary} />}
+            />
+
+            <TextInput
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              leftIcon={<Lock size={20} color={theme.textSecondary} />}
+            />
+
+            <Button
+              title="Create Account"
+              variant="primary"
+              size="lg"
+              style={styles.submitBtn}
+            />
+          </View>
+
+          <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+            Already have an account?{" "}
+            <Link
+              href="/signin"
+              asChild
+              onPress={(e) => {
+                const state = navigation.getState();
+                const routes = state?.routes || [];
+                const previousRoute = routes[routes.length - 2];
+                if (previousRoute && previousRoute.name === "signin") {
+                  e.preventDefault();
+                  router.back();
+                }
+              }}
+            >
+              <Text type="linkPrimary" style={styles.linkText}>
+                Sign In
+              </Text>
+            </Link>
+          </Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -80,19 +116,41 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingVertical: 128,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.four,
+    justifyContent: "center",
+    paddingBottom: Spacing.six,
+  },
+  headerSection: {
+    alignItems: "center",
+    marginBottom: Spacing.five,
   },
   title: {
     textAlign: "center",
+    fontWeight: "700",
+    marginBottom: Spacing.one,
   },
-  formContainer: {
-    paddingHorizontal: 16,
-    gap: 12,
-    flex: 1,
-    justifyContent: "flex-end",
+  subtitle: {
+    textAlign: "center",
+    fontSize: 15,
+  },
+  cardContainer: {
+    borderRadius: Radius.xl,
+    padding: Spacing.four,
+    gap: Spacing.three,
+    borderWidth: 1,
+  },
+  submitBtn: {
+    marginTop: Spacing.two,
   },
   footerText: {
     textAlign: "center",
-    marginTop: 24,
+    marginTop: Spacing.four,
+    fontSize: 15,
+  },
+  linkText: {
+    fontWeight: "700",
   },
 });

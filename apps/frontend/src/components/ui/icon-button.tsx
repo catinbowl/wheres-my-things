@@ -1,31 +1,48 @@
 import { Radius } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
 import { ReactNode } from "react";
 import {
   Pressable,
   PressableProps,
-  PressableStateCallbackType,
-  StyleProp,
   StyleSheet,
   View,
-  ViewProps,
-  ViewStyle,
 } from "react-native";
 
 type Props = PressableProps & {
   children: ReactNode;
+  variant?: "default" | "filled" | "primary";
 };
 
-export default function IconButton({ style, children, ...props }: Props) {
+export default function IconButton({
+  style,
+  children,
+  variant = "default",
+  ...props
+}: Props) {
+  const theme = useTheme();
+
   return (
     <Pressable
       style={(state) => [
         styles.pressable,
+        variant === "filled" && {
+          backgroundColor: theme.backgroundElement,
+        },
+        variant === "primary" && {
+          backgroundColor: theme.primary,
+        },
+        state.pressed && {
+          backgroundColor:
+            variant === "primary"
+              ? theme.primaryPressed
+              : theme.backgroundSelected,
+          opacity: 0.85,
+        },
         typeof style === "function" ? style(state) : style,
-        state.pressed && styles.pressablePressed,
       ]}
       {...props}
     >
-      <View>{children}</View>
+      <View style={styles.iconWrapper}>{children}</View>
     </Pressable>
   );
 }
@@ -33,9 +50,12 @@ export default function IconButton({ style, children, ...props }: Props) {
 const styles = StyleSheet.create({
   pressable: {
     padding: 8,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  pressablePressed: {
-    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  iconWrapper: {
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

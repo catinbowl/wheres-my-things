@@ -1,57 +1,51 @@
+import React from "react";
 import TextInput from "./text-input";
 import IconButton from "./icon-button";
-
 import { StyleSheet, TextInputProps } from "react-native";
 import { View } from "../view";
 import { Search, X } from "lucide-react-native";
-import { useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
 
 type Props = {
   value?: string;
-  onChangeText?: TextInputProps["onChangeText"];
+  onChangeText?: (text: string) => void;
+  placeholder?: string;
 };
 
-export default function SearchBar({ value, onChangeText }: Props) {
+export default function SearchBar({
+  value = "",
+  onChangeText,
+  placeholder = "Search belongings...",
+}: Props) {
+  const theme = useTheme();
+
   return (
     <View style={styles.container}>
       <TextInput
         value={value}
-        onChangeText={onChangeText ? onChangeText : undefined}
-        placeholder="Search"
-      />
-      <IconButton
-        style={styles.actionButton}
-        onPress={
-          value
-            ? () => {
-                if (value !== "") {
-                }
-              }
-            : undefined
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        leftIcon={<Search size={20} color={theme.textSecondary} />}
+        rightIcon={
+          value.length > 0 ? (
+            <IconButton
+              onPress={() => onChangeText?.("")}
+              style={styles.clearButton}
+            >
+              <X size={18} color={theme.textSecondary} />
+            </IconButton>
+          ) : undefined
         }
-      >
-        {value ? (
-          value === "" ? (
-            <Search size={24} />
-          ) : (
-            <X size={24} />
-          )
-        ) : (
-          <Search size={24} />
-        )}
-      </IconButton>
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: "relative",
+    width: "100%",
   },
-  actionButton: {
-    position: "absolute",
-    right: 8,
-    top: "50%",
-    transform: [{ translateY: "-50%" }],
+  clearButton: {
+    padding: 4,
   },
 });
