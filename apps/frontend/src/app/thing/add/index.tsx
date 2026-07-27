@@ -1,8 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
 import Button from "@/components/ui/button";
 import IconButton from "@/components/ui/icon-button";
 import Header from "@/components/ui/header";
 
+import { useCallback, useRef, useState } from "react";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { ImageManipulator } from "expo-image-manipulator";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -110,15 +110,6 @@ const AddThingScreen = () => {
       />
 
       <SafeAreaView style={styles.overlaySafeArea} pointerEvents="box-none">
-        <View style={styles.topBar}>
-          <IconButton
-            variant="filled"
-            onPress={() => router.back()}
-            style={styles.glassButton}
-          >
-            <Header showBack={true} />
-          </IconButton>
-        </View>
 
         <View style={styles.bottomControls}>
           <IconButton
@@ -199,15 +190,7 @@ const styles = StyleSheet.create({
   },
   overlaySafeArea: {
     ...StyleSheet.absoluteFill,
-    justifyContent: "space-between",
-  },
-  topBar: {
-    paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-  },
-  glassButton: {
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: Radius.lg,
+    justifyContent: "flex-end",
   },
   bottomControls: {
     flexDirection: "row",
