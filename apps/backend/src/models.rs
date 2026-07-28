@@ -54,3 +54,15 @@ pub struct SubscribeRequest {
     #[serde(rename = "planId")]
     pub plan_id: String,
 }
+
+#[derive(Deserialize)]
+pub struct CheckUsernameQuery {
+    pub username: String,
+}
+
+#[derive(Serialize)]
+pub struct CheckUsernameResponse {
+    pub available: bool,
+    pub message: String,
+}
+

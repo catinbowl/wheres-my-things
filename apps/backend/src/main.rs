@@ -6,7 +6,9 @@ use axum::{
 use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
 use tower_http::cors::{AllowOrigin, CorsLayer};
+use tower_http::trace::TraceLayer;
 use tcmalloc::TCMalloc;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod db;
 mod models;
@@ -17,6 +19,15 @@ static ALLOCATOR: TCMalloc = TCMalloc;
 
 #[tokio::main]
 async fn main() {
+    // Initialize tracing subscriber for terminal logs
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "backend=info,tower_http=info".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     // Load .env file variables
     dotenvy::dotenv().ok();
 
@@ -57,9 +68,12 @@ async fn main() {
         .route("/signin", post(handlers::auth::signin))
         .route("/validate", get(handlers::auth::validate))
         .route("/logout", get(handlers::auth::logout))
+        .route("/check-username", get(handlers::auth::check_username))
         .route("/users/subscribe", post(handlers::subscribe::subscribe))
+        .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(pool);
+
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();

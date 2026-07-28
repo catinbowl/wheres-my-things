@@ -1,12 +1,13 @@
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::{header::SET_COOKIE, HeaderMap, StatusCode},
     Json,
 };
 use sqlx::PgPool;
 use uuid::Uuid;
 use chrono::Utc;
-use crate::models::{DbUser, UserResponse, UserWrapper, SignUpRequest, SignInRequest};
+use crate::models::{DbUser, UserResponse, UserWrapper, SignUpRequest, SignInRequest, CheckUsernameQuery, CheckUsernameResponse};
+
 
 pub fn extract_session_token(headers: &HeaderMap) -> Option<String> {
     let cookie_header = headers.get("cookie")?.to_str().ok()?;
@@ -202,3 +203,44 @@ pub async fn logout(
 
     Ok((response_headers, Json(serde_json::json!({ "status": "ok" }))))
 }
+
+pub async fn check_username(
+    State(pool): State<PgPool>,
+    Query(query): Query<CheckUsernameQuery>,
+) -> Result<Json<CheckUsernameResponse>, (StatusCode, Json<serde_json::Value>)> {
+    let username = query.username.trim();
+    if username.is_empty() {
+        tracing::info!("[check-username] Received empty username parameter");
+        return Ok(Json(CheckUsernameResponse {
+            available: false,
+            message: "Username cannot be empty".to_string(),
+        }));
+    }
+
+    let existing: Option<sqlx::postgres::PgRow> = sqlx::query(
+        "SELECT uid FROM users WHERE LOWER(username) = LOWER($1)"
+    )
+    .bind(username)
+    .fetch_optional(&pool)
+    .await
+    .map_err(|e| {
+        tracing::error!("[check-username] DB error for '{}': {}", username, e);
+        (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({ "error": e.to_string() })))
+    })?;
+
+    let available = existing.is_none();
+    tracing::info!("[check-username] Username '{}' available: {}", username, available);
+
+    if available {
+        Ok(Json(CheckUsernameResponse {
+            available: true,
+            message: "Username is available".to_string(),
+        }))
+    } else {
+        Ok(Json(CheckUsernameResponse {
+            available: false,
+            message: "Username is already taken".to_string(),
+        }))
+    }
+}
+

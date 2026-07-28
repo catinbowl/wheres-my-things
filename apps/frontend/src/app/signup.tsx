@@ -1,10 +1,12 @@
-import React, { useState } from "react";
 import Button from "@/components/ui/button";
 import TextInput from "@/components/ui/text-input";
 import Header from "@/components/ui/header";
+
+import { useEffect, useState } from "react";
 import { Text } from "@/components/text";
 import { Link, useRouter, useNavigation } from "expo-router";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Mail, Lock, User } from "lucide-react-native";
+import { Mail, Lock, User, Check, XCircle } from "lucide-react-native";
 import { Spacing, Radius } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -20,10 +22,57 @@ export default function SignUpScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const theme = useTheme();
-
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<{
+    available: boolean;
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      setUsernameStatus(null);
+      setIsCheckingUsername(false);
+      return;
+    }
+
+    setIsCheckingUsername(true);
+    setUsernameStatus(null);
+
+    const timer = setTimeout(async () => {
+      try {
+        const apiHost = process.env.API_HOST_URL || "";
+        const res = await fetch(
+          `${apiHost}/check-username?username=${encodeURIComponent(trimmed)}`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          setUsernameStatus({
+            available: data.available,
+            message: data.message,
+          });
+        } else {
+          setUsernameStatus({
+            available: false,
+            message: "Unable to check username availability",
+          });
+        }
+      } catch (error) {
+        setUsernameStatus({
+          available: false,
+          message: "Error connecting to server",
+        });
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [username]);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -55,12 +104,41 @@ export default function SignUpScreen() {
               },
             ]}
           >
-            <TextInput
-              placeholder="Username"
-              value={username}
-              onChangeText={setUsername}
-              leftIcon={<User size={20} color={theme.textSecondary} />}
-            />
+            <View style={styles.inputGroup}>
+              <TextInput
+                placeholder="Username"
+                autoCapitalize="none"
+                value={username}
+                onChangeText={setUsername}
+                leftIcon={<User size={20} color={theme.textSecondary} />}
+                error={usernameStatus !== null && !usernameStatus.available}
+                rightIcon={
+                  isCheckingUsername ? (
+                    <ActivityIndicator size="small" color={theme.primary} />
+                  ) : usernameStatus ? (
+                    usernameStatus.available ? (
+                      <Check size={20} color="#10B981" />
+                    ) : (
+                      <XCircle size={20} color={theme.danger} />
+                    )
+                  ) : null
+                }
+              />
+              {usernameStatus && (
+                <Text
+                  style={[
+                    styles.statusText,
+                    {
+                      color: usernameStatus.available
+                        ? "#10B981"
+                        : theme.danger,
+                    },
+                  ]}
+                >
+                  {usernameStatus.message}
+                </Text>
+              )}
+            </View>
 
             <TextInput
               placeholder="Email address"
@@ -142,6 +220,13 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     borderWidth: 1,
   },
+  inputGroup: {
+    gap: Spacing.one,
+  },
+  statusText: {
+    fontSize: 13,
+    marginLeft: Spacing.one,
+  },
   submitBtn: {
     marginTop: Spacing.two,
   },
@@ -154,3 +239,4 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
+
