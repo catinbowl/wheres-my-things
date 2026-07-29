@@ -1,24 +1,25 @@
-import React, { useEffect, useState } from "react";
-import Animated from "react-native-reanimated";
 import MiniMap from "@/components/mini-map";
-import Header from "@/components/ui/header";
-import IconButton from "@/components/ui/icon-button";
 import SlideUpModal from "@/components/slide-up-modal";
 import Button from "@/components/ui/button";
+import Header from "@/components/ui/header";
+import IconButton from "@/components/ui/icon-button";
+import Animated from "react-native-reanimated";
 
+import { Text } from "@/components/text";
+import { Radius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { useThingActions } from "@/hooks/use-thing-actions";
 import { ThingsRepo } from "@/services/database/repos/things-repo";
 import { TThing } from "@/services/database/types";
 import { useAppDispatch } from "@/services/store/hooks";
+import { fetchThings } from "@/services/store/slices/things-slice";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
+import { StatusBar } from "expo-status-bar";
 import { MapPin, Share2, Trash2 } from "lucide-react-native";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { fetchThings } from "@/services/store/slices/things-slice";
-import { Text } from "@/components/text";
-import { useThingActions } from "@/hooks/use-thing-actions";
-import { Radius, Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
 
 const ThingScreen = () => {
   const router = useRouter();
@@ -67,6 +68,8 @@ const ThingScreen = () => {
 
   return (
     <SafeAreaView style={[style.safeArea, { backgroundColor: theme.background }]}>
+      <StatusBar style="dark" />
+
       <Header
         title={thing?.name || "Belonging Detail"}
         actionButtons={

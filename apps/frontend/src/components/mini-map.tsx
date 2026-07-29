@@ -68,10 +68,10 @@ const Map = ({
       Math.min(
         1,
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-          Math.cos(lat1) *
-            Math.cos(lat2) *
-            Math.sin(dLon / 2) *
-            Math.sin(dLon / 2),
+        Math.cos(lat1) *
+        Math.cos(lat2) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2),
       ),
     );
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -113,7 +113,6 @@ const Map = ({
 
   const { distance, x, y } = stats;
   const accuracy = location?.accuracy || 0;
-
   const maxDim = Math.max(Math.abs(x), Math.abs(y), accuracy, 10);
   const scale = canvasSize / 2 / (maxDim * 1.5);
 
@@ -182,21 +181,19 @@ const styles = StyleSheet.create({
     minHeight: 200,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(0, 0, 0, 0.3)",
-    borderRadius: Radius.lg,
     overflow: "hidden",
   },
   infoOverlay: {
     position: "absolute",
-    top: 0,
-    right: 0,
+    top: 8,
+    right: 8,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: 8,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: Radius.xl,
   },
   distanceText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "800",
     color: "#1a1a1a",
   },
@@ -214,8 +211,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     gap: 16,
-    marginTop: 8,
-    paddingTop: 8,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },

@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 180,
+    aspectRatio: 4 / 3,
   },
   contentRow: {
     flexDirection: "row",
