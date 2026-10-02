@@ -1,0 +1,9 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/catinbowl/wheres-my-things-be.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/catinbowl/wheres-my-things-fe.git
+[submodule "database"]
+	path = database
+	url = https://codeberg.org/catinbowl/catinbowl-databases.git
